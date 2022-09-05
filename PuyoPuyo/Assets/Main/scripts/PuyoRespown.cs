@@ -29,6 +29,7 @@ public class PuyoRespown : MonoBehaviour
 
         GameObject obj1 = Instantiate(puyo_temp[UnityEngine.Random.Range(0, 5)]);
         GameObject obj2 = Instantiate(puyo_temp[UnityEngine.Random.Range(0, 5)]);
+        
 
         newPuyo[0] = obj1;
         newPuyo[1] = obj2;

@@ -15,6 +15,8 @@ public class PuyoManager : MonoBehaviour
 
     private GameObject[] active_puyo = new GameObject[2];
 
+    private float down_delay = 0.2f;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -38,7 +40,7 @@ public class PuyoManager : MonoBehaviour
         //左矢印キーを押したとき
         else if (Input.GetKeyDown(KeyCode.LeftArrow))
         {
-            Active_Puyo_RightMove();
+            Active_Puyo_LeftMove();
         }
         //上矢印キーを押したとき
         else if (Input.GetKeyDown(KeyCode.UpArrow))
@@ -46,9 +48,13 @@ public class PuyoManager : MonoBehaviour
 
         }
         //下矢印キーを押したとき
-        else if (Input.GetKeyDown(KeyCode.DownArrow))
+        if (Input.GetKey(KeyCode.DownArrow))
         {
-
+            down_delay = 0.05f;
+        }
+        else
+        {
+            down_delay = 0.2f;
         }
     }
 
@@ -59,7 +65,7 @@ public class PuyoManager : MonoBehaviour
     //ぷよ右移動
     void Active_Puyo_RightMove()
     {
-        if (!Is_con()) return;  //操作可能時のみ
+        if (Is_con()) return;  //操作可能時のみ
 
         //原点のぷよのオブジェクト(一番右側のぷよ)
         GameObject ori_puyo = active_puyo[0];
@@ -68,13 +74,45 @@ public class PuyoManager : MonoBehaviour
             ori_puyo = active_puyo[1];
         }
 
-        if(ori_puyo.transform.position.x <= 4)
+
+        //ステージの範囲内で
+        if (ori_puyo.transform.position.x < STAGE_MASS.y - 1)
         {
-            //active_puyo[0].transform.position.x
+            //マス上に遮るものがないとき
+            Vector2Int pos1 = new Vector2Int((int)active_puyo[0].transform.position.x, (int)active_puyo[0].transform.position.y);
+            Vector2Int pos2 = new Vector2Int((int)active_puyo[1].transform.position.x, (int)active_puyo[1].transform.position.y);
+            if (Stage_puyo[pos1.y + 1, pos1.x] == 0 && Stage_puyo[pos2.y + 1, pos2.x] == 0)
+            {
+                active_puyo[0].transform.position += new Vector3(1.0f, 0.0f, 0.0f);
+                active_puyo[1].transform.position += new Vector3(1.0f, 0.0f, 0.0f);
+            }
+        }
+        
+    }
+
+    void Active_Puyo_LeftMove()
+    {
+        if (Is_con()) return;  //操作可能時のみ
+
+        //原点のぷよのオブジェクト(一番左側のぷよ)
+        GameObject ori_puyo = active_puyo[0];
+        if (active_puyo[0].transform.position.x > active_puyo[1].transform.position.x)
+        {
+            ori_puyo = active_puyo[1];
         }
 
-
-
+        //ステージの範囲内で
+        if (ori_puyo.transform.position.x > 0)
+        {
+            //マス上に遮るものがないとき
+            Vector2Int pos1 = new Vector2Int((int)active_puyo[0].transform.position.x, (int)active_puyo[0].transform.position.y);
+            Vector2Int pos2 = new Vector2Int((int)active_puyo[1].transform.position.x, (int)active_puyo[1].transform.position.y);
+            if (Stage_puyo[pos1.y - 1,pos1.x] == 0 && Stage_puyo[pos2.y - 1, pos2.x] == 0)
+            {
+                active_puyo[0].transform.position -= new Vector3(1.0f, 0.0f, 0.0f);
+                active_puyo[1].transform.position -= new Vector3(1.0f, 0.0f, 0.0f);
+            }
+        }
     }
 
 
@@ -98,9 +136,9 @@ public class PuyoManager : MonoBehaviour
     }
 
     //ぷよの落下処理
-    private IEnumerator Puyo_Down(float delayTime = 0.2f)
+    private IEnumerator Puyo_Down()
     {
-        yield return new WaitForSeconds(delayTime);
+        yield return new WaitForSeconds(down_delay);
 
         if(active_puyo[0] != null && active_puyo[1] != null)
         {
@@ -159,6 +197,7 @@ public class PuyoManager : MonoBehaviour
             Vector2Int pos = new Vector2Int((int)active_puyo[puyo_num].transform.position.x, (int)active_puyo[puyo_num].transform.position.y);
 
             Stage_puyo[pos.y, pos.x] = active_puyo[puyo_num].GetComponent<Puyo_Color>().Get_Color();
+            Debug.Log("Color" + active_puyo[puyo_num].GetComponent<Puyo_Color>().Get_Color() );
             
             //着地したぷよを削除
             active_puyo[puyo_num] = null;
@@ -195,7 +234,7 @@ public class PuyoManager : MonoBehaviour
         Vector2Int pos = new Vector2Int((int)active_puyo[num].transform.position.x, (int)active_puyo[num].transform.position.y);
 
         Stage_puyo[pos.y, pos.x] = active_puyo[num].GetComponent<Puyo_Color>().Get_Color();
-
+        
         //着地したぷよを削除
         active_puyo[num] = null;
 
@@ -235,6 +274,15 @@ public class PuyoManager : MonoBehaviour
         else
         {
             return true;
+        }
+    }
+
+    void Deb_Stage_poyo()
+    {
+        //ステージマス上のデータの初期化
+        for (int i = STAGE_MASS.x-1; i >0; i--)
+        {
+            Debug.Log(i + "行目　0->" + Stage_puyo[i,0] + "\t1->" + Stage_puyo[i, 1] + "\t2->" + Stage_puyo[i, 2] + "\t3->" + Stage_puyo[i, 3] + "\t4->" + Stage_puyo[i, 4] + "\t5->" + Stage_puyo[i, 5]);
         }
     }
 }

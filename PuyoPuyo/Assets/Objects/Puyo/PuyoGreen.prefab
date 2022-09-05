@@ -10,6 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 6875512750774187777}
   - component: {fileID: -8079243156152765530}
+  - component: {fileID: 1692058746367956410}
   m_Layer: 0
   m_Name: PuyoGreen
   m_TagString: Untagged
@@ -45,6 +46,24 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _Color: 2
+--- !u!114 &1692058746367956410
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1529748915193451094}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7ce5c47d7f61ce4468c67701c9f54d2a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  anim_image:
+  - {fileID: 21300000, guid: 7b9c2d23f699adb47a479daad5532854, type: 3}
+  - {fileID: 21300000, guid: 00b11efaf1009d6468df8ec65d685fe0, type: 3}
+  - {fileID: 21300000, guid: 10a742083d855cc44ad27009faf15e70, type: 3}
+  - {fileID: 21300000, guid: 7e55c103b2b4c194bb5e0afa6a7ad09d, type: 3}
+  - {fileID: 21300000, guid: 45765a1a547949e479960d12fbf2cd39, type: 3}
 --- !u!1 &3158926297424762399
 GameObject:
   m_ObjectHideFlags: 0
