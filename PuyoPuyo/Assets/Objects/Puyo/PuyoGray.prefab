@@ -94,7 +94,7 @@ GameObject:
   - component: {fileID: -8575123450708445099}
   m_Layer: 0
   m_Name: PuyoGray
-  m_TagString: Untagged
+  m_TagString: Puyo
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -126,7 +126,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 93290e8cbd90b364c96a90086f211796, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _Color: 1
+  _Color: 2
 --- !u!114 &-8575123450708445099
 MonoBehaviour:
   m_ObjectHideFlags: 0
