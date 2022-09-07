@@ -64,6 +64,14 @@ MonoBehaviour:
   - {fileID: 21300000, guid: bd98ae3f7ed29d842b85b30f8030214a, type: 3}
   - {fileID: 21300000, guid: 86969a3ab56a0434c86a880ef9fc08d4, type: 3}
   - {fileID: 21300000, guid: 948dc0cf51302264d944ae66f62c7e63, type: 3}
+  destroy_anim_image:
+  - {fileID: 21300000, guid: b5ddde6ab6efba149a849f635a2059e3, type: 3}
+  - {fileID: 21300000, guid: 9f4d6f4f78654a74ea78d0b44915d35b, type: 3}
+  - {fileID: 21300000, guid: c1e7fa1bca2783e4e971ac6287a7493a, type: 3}
+  - {fileID: 21300000, guid: 64324dbf92fa79c40b232290666bfdfe, type: 3}
+  - {fileID: 21300000, guid: f310c9e93842a644da1c7042f4bca8f9, type: 3}
+  - {fileID: 21300000, guid: 294c47afc0cae174ea76cb083a3e850c, type: 3}
+  - {fileID: 21300000, guid: d6226a01b0582434cb43caf95c6618aa, type: 3}
 --- !u!1 &8502195599119959698
 GameObject:
   m_ObjectHideFlags: 0

@@ -2,16 +2,18 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+using UnityEngine.SceneManagement;
+
 public class PuyoManager : MonoBehaviour
 {
     //ステージマスの大きさ
-    Vector2Int STAGE_MASS = new Vector2Int(6, 14);
+    Vector2Int STAGE_MASS = new Vector2Int(6, 15);
 
     //落ちる量 1f=1マス
     float down_vol = 0.25f;
 
-    //ステージのぷよ用格納配列 縦,14マス 横6マス
-    private int[,] Stage_puyo = new int[6, 14];
+    //ステージのぷよ用格納配列 縦,15マス 横6マス
+    private int[,] Stage_puyo = new int[6, 15];
 
     private GameObject[] active_puyo = new GameObject[2];
 
@@ -19,16 +21,21 @@ public class PuyoManager : MonoBehaviour
 
     private Vector2Int[] last_puyos_pos = new Vector2Int[2];          //最後に置いたぷよの場所(２つ)
 
+    private int chain;
+
+    //スコア用
+    [SerializeField]ScoreManager SM;
+
     // Start is called before the first frame update
     void Start()
     {
+
+        chain = 0;
+
+
         stage_mass_Init();
 
-        active_puyo = this.gameObject.GetComponent<PuyoRespown>().Respown();
-        set_active_puyo_Position();
-
-
-        StartCoroutine(Puyo_Down());
+        create_new_puyo();
     }
 
     // Update is called once per frame
@@ -118,36 +125,12 @@ public class PuyoManager : MonoBehaviour
 
         if (dif.y != 0)
         {
-            Vector2 puyo = new Vector2(move_puyo.x + dif.y, move_puyo.y - dif.y);
 
-            //ぶつかったら移動しない
-            if (dif.y > 0)
-            { //右への当たり判定
+            ////回転できる時(次のぷよが横に来るとき)
+            ////1 次の回転座標が0の時
+            ////2 次の回転座標が0以外でも回転座標と対称のマスが0の時
 
-                if (puyo.x < STAGE_MASS.x)
-                {
-                    if (Stage_puyo[(int)puyo.x, (int)puyo.y] != 0)
-                    {
-                        return;
-                    }
-                }
-                else { return; }
-            }
-            else
-            {
-                //左への当たり判定
-                if (puyo.x >= 0)
-                {
-                    if (Stage_puyo[(int)puyo.x, (int)puyo.y] != 0)
-                    {
-                        return;
-                    }
-                }
-                else { return; }
-            }
-
-            //上から右に　と　下から左に
-            active_puyo[0].transform.position = new Vector2(move_puyo.x + dif.y, move_puyo.y - dif.y);
+            Next_Pos_side();        //次の移動先が横の場合
         }
         else
         {
@@ -171,6 +154,69 @@ public class PuyoManager : MonoBehaviour
         }
     }
 
+    void Next_Pos_side()
+    {//下側のぷよ(１番目)を起点に時計回りで回転    0番目のぷよを移動
+
+        Vector2 move_puyo = active_puyo[0].transform.position;
+
+        //0番目のぷよの場所
+        Vector2 dif = active_puyo[0].transform.position - active_puyo[1].transform.position;
+        Vector2 puyo = new Vector2(move_puyo.x + dif.y, move_puyo.y - dif.y);
+        //上(0,1) 下(0,-1)
+
+        //回転できる時(次のぷよが横に来るとき)
+        //1 次の回転座標が0の時
+        //2 次の回転座標が0以外でも回転座標と対称のマスが0の時
+
+
+        //1
+        if (Is_Stage_Range(puyo))
+        {
+            if (Stage_puyo[(int)puyo.x, (int)puyo.y] == 0)
+            {
+                Vector2[] move_poss = {puyo , active_puyo[1].transform.position };
+                Move_Active_Poyos_Pos(move_poss);
+
+                //移動できたので終了
+                return;
+            }
+            else
+            {
+                //割り込み移動
+                Oneself_Move(dif);
+            }
+        }
+        else
+        {
+            //割り込み移動
+            Oneself_Move(dif);
+        }
+    }
+
+    void Oneself_Move(Vector2 dif)
+    {
+        Vector2 move_puyo = active_puyo[0].transform.position;
+        //対称の場所が空いていたら1が0の場所に移動して
+        //0が空いているマスに移動
+        Vector2 puyo = new Vector2(move_puyo.x - dif.y, move_puyo.y);
+        if (!Is_Stage_Range(puyo)) return;
+        if (Stage_puyo[(int)puyo.x, (int)puyo.y] == 0)
+        {
+            Vector2[] move_poss = { active_puyo[0].transform.position ,puyo };
+            Move_Active_Poyos_Pos(move_poss);
+
+            //移動できたので終了
+            return;
+        }
+    }
+
+
+    void Move_Active_Poyos_Pos(Vector2[] poss)
+    {
+        active_puyo[0].transform.position = poss[0];
+        active_puyo[1].transform.position = poss[1];
+    }
+
     //右側用の当たり判定
     bool Is_Right_hit(Vector2[] puyo)
     {//原点のぷよのオブジェクト(一番右側のぷよ)
@@ -180,16 +226,14 @@ public class PuyoManager : MonoBehaviour
             ori_puyo = puyo[1];
         }
 
-        //ステージの範囲内で
-        if (ori_puyo.x < STAGE_MASS.x - 1)
+        //両方の右のマス上に遮るものがないとき
+        Vector2Int pos1 = new Vector2Int((int)puyo[0].x + 1, (int)puyo[0].y);
+        Vector2Int pos2 = new Vector2Int((int)puyo[1].x + 1, (int)puyo[1].y);
+        if (!Is_Stage_Range(pos1)) return true;
+        if (!Is_Stage_Range(pos2)) return true;
+        if (Stage_puyo[pos1.x, pos1.y] == 0 && Stage_puyo[pos2.x, pos2.y] == 0)
         {
-            //両方の右のマス上に遮るものがないとき
-            Vector2Int pos1 = new Vector2Int((int)puyo[0].x, (int)puyo[0].y);
-            Vector2Int pos2 = new Vector2Int((int)puyo[1].x, (int)puyo[1].y);
-            if (Stage_puyo[pos1.x + 1, pos1.y] == 0 && Stage_puyo[pos2.x + 1, pos2.y] == 0)
-            {
-                return false;
-            }
+            return false;
         }
         return true;
     }
@@ -202,17 +246,15 @@ public class PuyoManager : MonoBehaviour
         {
             ori_puyo = puyo[1];
         }
+        //両方の左のマス上に遮るものがないとき
+        Vector2Int pos1 = new Vector2Int((int)puyo[0].x - 1, (int)puyo[0].y);
+        Vector2Int pos2 = new Vector2Int((int)puyo[1].x - 1, (int)puyo[1].y);
 
-        //ステージの範囲内で
-        if (ori_puyo.x > 0)
+        if (!Is_Stage_Range(pos1)) return true;
+        if (!Is_Stage_Range(pos2)) return true;
+        if (Stage_puyo[pos1.x, pos1.y] == 0 && Stage_puyo[pos2.x, pos2.y] == 0)
         {
-            //両方の左のマス上に遮るものがないとき
-            Vector2Int pos1 = new Vector2Int((int)puyo[0].x, (int)puyo[0].y);
-            Vector2Int pos2 = new Vector2Int((int)puyo[1].x, (int)puyo[1].y);
-            if (Stage_puyo[pos1.x - 1, pos1.y] == 0 && Stage_puyo[pos2.x - 1, pos2.y] == 0)
-            {
-                return false;
-            }
+            return false;
         }
         return true;
     }
@@ -233,8 +275,8 @@ public class PuyoManager : MonoBehaviour
     //ぷよの初期位置の設定
     void set_active_puyo_Position()
     {
-        active_puyo[0].transform.position = new Vector3(2.0f, 14.0f, 0.0f);
-        active_puyo[1].transform.position = new Vector3(2.0f, 13.0f, 0.0f);
+        Vector2[] poss = { new Vector3(2.0f, 15.0f), new Vector3(2.0f, 14.0f) };
+        Move_Active_Poyos_Pos(poss);
     }
 
     //ぷよの落下処理
@@ -343,7 +385,8 @@ public class PuyoManager : MonoBehaviour
         active_puyo[num] = null;
 
         //ぷよが４つ以上つながってるかチェック
-        check_puyo();
+        //check_puyo();
+        check_Link();
 
     }
 
@@ -366,6 +409,23 @@ public class PuyoManager : MonoBehaviour
 
     }
 
+    private IEnumerator Puyo_Solo_Down(GameObject puyo ,Vector2 pos)
+    {
+        //操作時よりは早く落ちる
+        yield return new WaitForSeconds(0.03f);
+        if (puyo.transform.position.y <= pos.y)
+        {
+            yield break;
+        }
+
+        Vector3 down_vec = new Vector3(0.0f, down_vol, 0.0f);
+
+        puyo.transform.position -= down_vec;
+
+        StartCoroutine(Puyo_Solo_Down(puyo, pos));
+
+    }
+
     //どちらも着地していないときtrue
     bool Is_con()
     {
@@ -382,25 +442,94 @@ public class PuyoManager : MonoBehaviour
 
 
     Vector2Int[] temp = { new Vector2Int(0, 1), new Vector2Int(1, 0), new Vector2Int(0, -1), new Vector2Int(-1, 0) };
-    List<Vector2Int> Link_puyo = new List<Vector2Int>();
-    List<int>Link_Color = new List<int>();      //順に色を格納
-    void check_puyo()
-    {
-        //つながっているぷよを初期化
+    List<Vector2Int> Link_puyo = new List<Vector2Int>();        //つながっているぷよを一時保存先
+
+    List<List<Vector2Int>> del_puyos = new List<List<Vector2Int>>();        //消えるぷよを格納する　2次元配列
+
+    void check_Link()
+    {//つながっているぷよを初期化
+        del_puyos.Clear();
         Link_puyo.Clear();
-        Link_Color.Clear();
 
-        Link_puyo.Add(last_puyos_pos[0]);
-        Link_Color.Add(Stage_puyo[last_puyos_pos[0].x, last_puyos_pos[0].y]);
+        for (int i = 0; i < STAGE_MASS.y; i++)
+        {
+            for(int j = 0; j < STAGE_MASS.x; j++)
+            {
+                Vector2Int pos = new Vector2Int(j, i);
+                puyo_Link_check(pos);
+            }
+        }
 
-        //探索開始
-        Link_storage(last_puyos_pos[0]);
+        if(del_puyos.Count != 0)
+        {
+            //連鎖開始
+            chain++;
+            SM.Set_Score(Get_Del_Puyo_sum(),chain);
 
+            //つながっているぷよがあるまで繰り返す
+            //del_Puyo() => Stage_mass_make() => StartCoroutine(puyo_all_Down()) => check_Link() => del_Puyo() ....
+            Invoke("del_Puyo", 1.0f);
+            //del_Puyo();
+        }
+        else
+        {
+            //連鎖終了
+            chain = 0;
+
+
+            //ゲームオーバーチェック
+            if (Is_Check_GameOver())
+            {
+                //ゲームオーバー処理
+                StartCoroutine(puyo_over_anim());
+            }
+            else
+            {
+                //つながっているぷよがなくなれば終了して次のぷよを生成
+                create_new_puyo();
+            }
+
+
+        }
+    }
+
+    void puyo_Link_check(Vector2Int pos)
+    {
+        if (Stage_puyo[pos.x, pos.y] == 0) return;      //空白    
+        if (!Is_same_pos(pos)) return;                  //探索済みの座標
+
+        Link_puyo.Clear();
+        Link_puyo.Add(pos);
+        for (int i = 0; i < temp.Length; i++)
+        {
+            if (Is_sameColor(pos, i))
+            {
+                Link_storage(pos);
+            }
+        }
+
+        if (Link_puyo.Count >= 4)
+        {
+            del_puyos.Add(new List<Vector2Int>(Link_puyo));
+        }
+        return;
+    }
+
+    bool Is_same_pos(Vector2Int pos)
+    {
+        //同じ座標が存在したらfalse
+        for(int i = 0; i < del_puyos.Count; i++)
+        {
+            for(int j=0; j < del_puyos[i].Count; j++)
+            {
+                if (del_puyos[i][j] == pos) return false;
+            }
+        }
+        return true;
     }
 
     void Link_storage(Vector2Int pos)
     {
-        Deb_Stage_poyo();
         int link_puyo_num = Link_puyo.Count;
         bool[] Is_someCol = Is_SameColor(pos);
         for (int i = 0; i < temp.Length; i++)
@@ -424,47 +553,126 @@ public class PuyoManager : MonoBehaviour
                 }
             }
         }
-
-        if (Link_puyo.Count == link_puyo_num)
-        {
-            //探索しきったら
-            if (Link_puyo.Count >= 4)
-            {
-                //ぷよを削除
-                del_Puyo();
-            }
-            else
-            {
-                create_new_puyo();
-            }
-
-        }
     }
 
-    //ぽよを消す処理
+    //ぷよを消す処理
     void del_Puyo()
     {
         GameObject[] Puyos = GameObject.FindGameObjectsWithTag("Puyo");
 
         foreach (GameObject puyo in Puyos)
         {
-            foreach (Vector2Int del_pos in Link_puyo)
+            foreach(List<Vector2Int> col in del_puyos)
             {
-                if (del_pos.x == (int)puyo.transform.position.x
-                    && del_pos.y == (int)puyo.transform.position.y)
+                foreach(Vector2Int del_pos in col)
                 {
-                    Destroy(puyo);
-                    Stage_puyo[del_pos.x, del_pos.y] = 0;
+                    if (del_pos.x == (int)puyo.transform.position.x
+                    && del_pos.y == (int)puyo.transform.position.y)
+                    {
+                        StartCoroutine(puyo.GetComponent<puyo_anim>().destroy_anim());
+                        Stage_puyo[del_pos.x, del_pos.y] = 0;
+                    }
+                }
+            }
+        }
+        Stage_mass_make();
+    }
+
+    void Stage_mass_make()
+    {
+        for(int i = 0; i < STAGE_MASS.x; i++)
+        {
+            List<int> col = new List<int>();
+            col.Clear();
+
+            for (int j = 0; j < STAGE_MASS.y; j++)
+            {
+                if(Stage_puyo[i,j] != 0)
+                {
+                    col.Add(Stage_puyo[i, j]);
+                }
+            }
+            for (int j = 0; j < STAGE_MASS.y; j++)
+            {
+                if (col.Count > j)
+                {
+                    Stage_puyo[i, j] = col[j];
+                }
+                else
+                {
+                    Stage_puyo[i, j] = 0;
+                }
+            }
+        }
+        StartCoroutine(puyo_all_Down());
+    }
+
+    IEnumerator puyo_all_Down()
+    {
+        yield return new WaitForSeconds(0.1f);
+        bool Is_all_down = true;
+
+        
+        for (int i = 0; i < STAGE_MASS.x; i++)
+        {
+            List<GameObject> col_puyos = new List<GameObject>(Col_Puyos(i));
+            for(int j = 0; j < col_puyos.Count; j++)
+            {
+                //今は一瞬で移動
+                //col_puyos[j].transform.position  = move_pos;
+
+
+                //目標地点
+                Vector2 move_pos = new Vector2(i, j);
+
+                //ゆっくり落ちる
+                StartCoroutine(Puyo_Solo_Down(col_puyos[j],move_pos));
+            }
+
+        }
+
+
+        if (Is_all_down)
+        {
+            check_Link();
+        }
+        else
+        {
+            StartCoroutine(puyo_all_Down());
+        }
+    }
+
+    List<GameObject> Col_Puyos(int col)
+    {
+        List<GameObject> col_puyos = new List<GameObject>();
+
+        GameObject[] Puyos = GameObject.FindGameObjectsWithTag("Puyo");
+        foreach (GameObject puyo in Puyos)
+        {
+            if((int)puyo.transform.position.x == col && !puyo.GetComponent<puyo_anim>().Is_destroy)
+            {
+                col_puyos.Add(puyo);
+            }
+        }
+
+        for(int i = 0; i < col_puyos.Count; i++)
+        {
+            for(int j = i; j < col_puyos.Count; j++)
+            {
+                if(col_puyos[i].transform.position.y > col_puyos[j].transform.position.y)
+                {
+                    GameObject temp = col_puyos[i];
+                    col_puyos[i] = col_puyos[j];
+                    col_puyos[j] = temp;
                 }
             }
         }
 
-        create_new_puyo();
+        return col_puyos;
     }
 
 
     //４方向の同じ色を探索
-    //２回目以降なら第二引数あり
     bool[] Is_SameColor(Vector2Int pos)
     {
         bool[] FDir = { false, false, false, false };
@@ -486,8 +694,22 @@ public class PuyoManager : MonoBehaviour
         return FDir;
     }
 
+    bool Is_sameColor(Vector2Int pos , int dir)
+    {
+        Vector2Int next_pos = pos + temp[dir];
+        if (next_pos.x >= 0 && next_pos.x < STAGE_MASS.x
+                && next_pos.y >= 0 && next_pos.y < STAGE_MASS.y)         //ステージの範囲内
+        {
+            if (Stage_puyo[pos.x, pos.y] == Stage_puyo[next_pos.x, next_pos.y])
+            {
+                return true;
+            }
+        }
+        return false;
+    }
 
-    void create_new_puyo()
+
+    public void create_new_puyo()
     {
         //操作可能なぷよが全部落ちたので新しいぷよを呼び出し
         active_puyo = this.gameObject.GetComponent<PuyoRespown>().Respown();
@@ -498,7 +720,51 @@ public class PuyoManager : MonoBehaviour
 
     }
 
+    bool Is_Stage_Range(Vector2 pos)
+    {
+        bool v = 0 <= pos.x && pos.x < STAGE_MASS.x;
+        return v && 0 <= pos.y && pos.y < STAGE_MASS.y;
+    }
 
+    //ゲームオーバーチェック
+    bool Is_Check_GameOver()
+    {
+        return (Stage_puyo[2, STAGE_MASS.y - 1] != 0);
+    }
+
+    public int Get_chain()
+    {
+        return chain;
+    }
+
+    public int Get_Del_Puyo_sum()
+    {
+        //消えるぷよの総数を返す
+        int puyo_sum = 0;
+        foreach (List<Vector2Int> col in del_puyos)
+        {
+            foreach (Vector2Int puyo in col)
+            {
+                puyo_sum++;
+            }
+        }
+        return puyo_sum;
+    }
+
+    IEnumerator puyo_over_anim()
+    {
+        yield return new WaitForSeconds(0.1f);
+        GameObject[] Puyos = GameObject.FindGameObjectsWithTag("Puyo");
+        bool Is_puyo_cam = false;
+        foreach (GameObject puyo in Puyos)
+        {
+            puyo.transform.position -= new Vector3(0.0f, 0.5f, 0.0f);
+            if (puyo.transform.position.y >= -3.0f) Is_puyo_cam = true;
+        }
+
+        if (Is_puyo_cam) StartCoroutine(puyo_over_anim());
+        else { SceneManager.LoadScene("result", LoadSceneMode.Single); }
+    }
 
 
     //////////////////////////////////デバック用

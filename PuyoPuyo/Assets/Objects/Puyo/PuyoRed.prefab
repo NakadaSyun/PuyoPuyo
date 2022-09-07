@@ -145,3 +145,11 @@ MonoBehaviour:
   - {fileID: 21300000, guid: ed71498f645d4b1429884f88d76e9c67, type: 3}
   - {fileID: 21300000, guid: 942983327e0997c429ac67168542ef3c, type: 3}
   - {fileID: 21300000, guid: 525e4d40178a44e488e8184ffef26427, type: 3}
+  destroy_anim_image:
+  - {fileID: 21300000, guid: 597196ee77d1a5846875f371ee61cbe1, type: 3}
+  - {fileID: 21300000, guid: b88b56595484ada459943c534b187ef6, type: 3}
+  - {fileID: 21300000, guid: 25eed919ad5d9d44abcc9786c8a17e33, type: 3}
+  - {fileID: 21300000, guid: 69fde99e08d43be449b7163774cafd43, type: 3}
+  - {fileID: 21300000, guid: c2bb7defe1d9bbf4990a1412c3ad962f, type: 3}
+  - {fileID: 21300000, guid: b11a0e73be1c182409da44cd17710839, type: 3}
+  - {fileID: 21300000, guid: dc6feb3043ccbe44ead122297ef905fb, type: 3}
