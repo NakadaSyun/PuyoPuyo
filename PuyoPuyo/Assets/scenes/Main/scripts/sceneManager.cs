@@ -6,24 +6,14 @@ using UnityEngine.SceneManagement;
 
 public class sceneManager : MonoBehaviour
 {
-    // Start is called before the first frame update
-    void Start()
-    {
-        
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-        if (Input.GetKeyDown(KeyCode.Space))
-        {
-            GotoResult();
-        }
-    }
+    [SerializeField]Share_Variable SV;
+    
 
     //リザルトシーンへ飛ばす関数
     public void GotoResult()
     {
+        SV.Set_Score(gameObject.GetComponent<ScoreManager>().Get_Score());
+
         SceneManager.LoadScene("result", LoadSceneMode.Single);
     }
 }

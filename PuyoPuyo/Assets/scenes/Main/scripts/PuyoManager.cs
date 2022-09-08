@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-using UnityEngine.SceneManagement;
 
 public class PuyoManager : MonoBehaviour
 {
@@ -24,7 +23,7 @@ public class PuyoManager : MonoBehaviour
     private int chain;
 
     //スコア用
-    [SerializeField]ScoreManager SM;
+    [SerializeField]GameObject MM;
 
     // Start is called before the first frame update
     void Start()
@@ -464,7 +463,7 @@ public class PuyoManager : MonoBehaviour
         {
             //連鎖開始
             chain++;
-            SM.Set_Score(Get_Del_Puyo_sum(),chain);
+            MM.GetComponent<ScoreManager>().Set_Score(Get_Del_Puyo_sum(),chain);
 
             //つながっているぷよがあるまで繰り返す
             //del_Puyo() => Stage_mass_make() => StartCoroutine(puyo_all_Down()) => check_Link() => del_Puyo() ....
@@ -763,7 +762,7 @@ public class PuyoManager : MonoBehaviour
         }
 
         if (Is_puyo_cam) StartCoroutine(puyo_over_anim());
-        else { SceneManager.LoadScene("result", LoadSceneMode.Single); }
+        else { MM.GetComponent<sceneManager>().GotoResult(); }
     }
 
 
