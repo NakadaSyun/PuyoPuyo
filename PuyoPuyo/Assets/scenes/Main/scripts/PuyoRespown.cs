@@ -13,13 +13,19 @@ public class PuyoRespown : MonoBehaviour
     //次のぷよを置いておく場所2つ分
     [SerializeField] GameObject[] stanby_pos = new GameObject[2];
 
-    //次のぷよ(0,1) その次のぷよ(2,3)
+    //おきぷよ(0,1) その次のおきぷよ(2,3)
     private GameObject[] stanby_puyo = new GameObject[4];
-    private int Color_Max = 6;
+
+    //ぷよの作成数
+    int puyo_count;
+
+    //色取得用
+    [SerializeField] Color_Order CO;
 
     // Start is called before the first frame update
     void Start()
     {
+        puyo_count = 0;
         Init_reserve();
         //this.GetComponent<PuyoManager>().create_new_puyo();
     }
@@ -30,21 +36,7 @@ public class PuyoRespown : MonoBehaviour
         
     }
 
-    //ぷよの生成処理
-    public GameObject[] Respown()
-    {
-        //メイン用にでてくるぷよ
-        GameObject[] newPuyo = new GameObject[2];
-        
-
-        newPuyo[0] = stanby_puyo[0];
-        newPuyo[1] = stanby_puyo[1];
-
-        //次のぷよを準備
-        puyo_next();
-
-        return newPuyo;
-    }
+    
     void puyo_next()
     {
         //セットしたぷよの押上
@@ -57,8 +49,8 @@ public class PuyoRespown : MonoBehaviour
     {
         //次のぷよの生成
 
-        stanby_puyo[2] = Instantiate(puyo_temp[UnityEngine.Random.Range(0, Color_Max)]);
-        stanby_puyo[3] = Instantiate(puyo_temp[UnityEngine.Random.Range(0, Color_Max)]);
+        stanby_puyo[2] = Puyo_Create();
+        stanby_puyo[3] = Puyo_Create();
 
         set_reseve_pos();
     }
@@ -70,27 +62,42 @@ public class PuyoRespown : MonoBehaviour
             Vector3 pos = stanby_pos[i].transform.position;
 
             stanby_puyo[(i*2)].transform.position =pos;
+
             stanby_puyo[(i*2) + 1].transform.position =pos + new Vector3(0.0f,1.0f,0.0f);
         }
     }
 
+
     void Init_reserve()
     {
 
-        stanby_puyo[0] = Instantiate(puyo_temp[UnityEngine.Random.Range(0, Color_Max)]);
-        stanby_puyo[1] = Instantiate(puyo_temp[UnityEngine.Random.Range(0, Color_Max)]);
-        stanby_puyo[2] = Instantiate(puyo_temp[UnityEngine.Random.Range(0, Color_Max)]);
-        stanby_puyo[3] = Instantiate(puyo_temp[UnityEngine.Random.Range(0, Color_Max)]);
+        stanby_puyo[0] = Puyo_Create();
+        stanby_puyo[1] = Puyo_Create();
+        stanby_puyo[2] = Puyo_Create();
+        stanby_puyo[3] = Puyo_Create();
 
         set_reseve_pos();
     }
 
-    public void Set_MaxColor(int num)
+    //ぷよの生成処理
+    public GameObject[] Respown()
     {
-        if (num < 0) num = 0;
-        if (num > 6) num = 6;
+        //メイン用にでてくるぷよ
+        GameObject[] newPuyo = new GameObject[2];
 
-        Color_Max = num;
+
+        newPuyo[0] = stanby_puyo[0];
+        newPuyo[1] = stanby_puyo[1];
+
+        //次のぷよを準備
+        puyo_next();
+
+        return newPuyo;
+    }
+
+    GameObject Puyo_Create()
+    {
+        return Instantiate(puyo_temp[CO.Get_color_num(puyo_count++)]);
     }
 
 }

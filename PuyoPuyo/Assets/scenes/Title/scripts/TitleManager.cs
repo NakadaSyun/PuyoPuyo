@@ -19,6 +19,6 @@ public class TitleManager : MonoBehaviour
 
     public void Oncrick()
     {
-        SceneManager.LoadScene("Main", LoadSceneMode.Single);
+        SceneManager.LoadScene("select", LoadSceneMode.Single);
     }
 }

@@ -12,4 +12,9 @@ public class Share_Variable : ScriptableObject
     {
         Score = score;
     }
+
+    public int Get_Score()
+    {
+        return Score;
+    }
 }

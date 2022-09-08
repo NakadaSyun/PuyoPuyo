@@ -1,15 +1,22 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 using UnityEngine.SceneManagement;
 
 public class resultManager : MonoBehaviour
 {
+    [SerializeField]Share_Variable SV;
+    int score;
+
+    [SerializeField] Text score_text;
+
     // Start is called before the first frame update
     void Start()
     {
-        
+        score = SV.Get_Score();
+        score_text.text = "SCORE : " + score.ToString();
     }
 
     // Update is called once per frame
