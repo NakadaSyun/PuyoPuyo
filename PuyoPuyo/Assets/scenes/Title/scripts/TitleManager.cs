@@ -8,6 +8,7 @@ public class TitleManager : MonoBehaviour
     // Start is called before the first frame update
     [SerializeField] BGM_Manager BM;
     [SerializeField] SE_Manager SM;
+    [SerializeField] feed_Con feed;
     void Start()
     {
         
@@ -20,7 +21,8 @@ public class TitleManager : MonoBehaviour
         {
             SM.SE_Play(0);
             StartCoroutine(BM.BGM_feedout());
-            StartCoroutine(GotoSelect(1.0f));
+            feed.Is_feedout();
+            StartCoroutine(GotoSelect(1.2f));
         }
     }
 

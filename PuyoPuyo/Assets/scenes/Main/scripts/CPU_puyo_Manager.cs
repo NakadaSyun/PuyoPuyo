@@ -22,7 +22,8 @@ public class CPU_puyo_Manager : MonoBehaviour
 
     private int chain;
 
-    private readonly float width_collect_val = 17.5f;
+    [SerializeField] private float width_collect_val;
+    [SerializeField] bool Is_AI = true;
 
     //スコア用
     [SerializeField] GameObject MM;
@@ -41,7 +42,10 @@ public class CPU_puyo_Manager : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-
+        if (!Is_AI)
+        {
+            Key_input();        //キー入力があった時の処理
+        }
 
     }
 
@@ -136,7 +140,7 @@ public class CPU_puyo_Manager : MonoBehaviour
             //下に行くとき
             if (dif.x == 1)
             {
-                Vector2Int pos = new Vector2Int((int)active_puyo[1].transform.position.x, (int)active_puyo[1].transform.position.y);
+                Vector2Int pos = new Vector2Int((int)(active_puyo[1].transform.position.x - width_collect_val), (int)active_puyo[1].transform.position.y);
                 if (pos.y != 0)
                 {
                     //下のマス
@@ -157,6 +161,7 @@ public class CPU_puyo_Manager : MonoBehaviour
     {//下側のぷよ(１番目)を起点に時計回りで回転    0番目のぷよを移動
 
         Vector2 move_puyo = active_puyo[0].transform.position;
+        move_puyo.x -= width_collect_val;
 
         //0番目のぷよの場所
         Vector2 dif = active_puyo[0].transform.position - active_puyo[1].transform.position;
@@ -173,6 +178,7 @@ public class CPU_puyo_Manager : MonoBehaviour
         {
             if (Stage_puyo[(int)puyo.x, (int)puyo.y] == 0)
             {
+                puyo.x += width_collect_val;
                 Vector2[] move_poss = { puyo, active_puyo[1].transform.position };
                 Move_Active_Poyos_Pos(move_poss);
 
@@ -195,12 +201,14 @@ public class CPU_puyo_Manager : MonoBehaviour
     void Oneself_Move(Vector2 dif)
     {
         Vector2 move_puyo = active_puyo[0].transform.position;
+        move_puyo.x -= width_collect_val;
         //対称の場所が空いていたら1が0の場所に移動して
         //0が空いているマスに移動
         Vector2 puyo = new Vector2(move_puyo.x - dif.y, move_puyo.y);
         if (!Is_Stage_Range(puyo)) return;
         if (Stage_puyo[(int)puyo.x, (int)puyo.y] == 0)
         {
+            puyo.x += width_collect_val;
             Vector2[] move_poss = { active_puyo[0].transform.position, puyo };
             Move_Active_Poyos_Pos(move_poss);
 
@@ -226,8 +234,8 @@ public class CPU_puyo_Manager : MonoBehaviour
         }
 
         //両方の右のマス上に遮るものがないとき
-        Vector2Int pos1 = new Vector2Int((int)puyo[0].x + 1, (int)puyo[0].y);
-        Vector2Int pos2 = new Vector2Int((int)puyo[1].x + 1, (int)puyo[1].y);
+        Vector2Int pos1 = new Vector2Int((int)(puyo[0].x - width_collect_val) + 1, (int)puyo[0].y);
+        Vector2Int pos2 = new Vector2Int((int)(puyo[1].x - width_collect_val) + 1, (int)puyo[1].y);
         if (!Is_Stage_Range(pos1)) return true;
         if (!Is_Stage_Range(pos2)) return true;
         if (Stage_puyo[pos1.x, pos1.y] == 0 && Stage_puyo[pos2.x, pos2.y] == 0)
@@ -246,8 +254,8 @@ public class CPU_puyo_Manager : MonoBehaviour
             ori_puyo = puyo[1];
         }
         //両方の左のマス上に遮るものがないとき
-        Vector2Int pos1 = new Vector2Int((int)puyo[0].x - 1, (int)puyo[0].y);
-        Vector2Int pos2 = new Vector2Int((int)puyo[1].x - 1, (int)puyo[1].y);
+        Vector2Int pos1 = new Vector2Int((int)(puyo[0].x - width_collect_val) - 1, (int)puyo[0].y);
+        Vector2Int pos2 = new Vector2Int((int)(puyo[1].x - width_collect_val) - 1, (int)puyo[1].y);
 
         if (!Is_Stage_Range(pos1)) return true;
         if (!Is_Stage_Range(pos2)) return true;
@@ -261,6 +269,7 @@ public class CPU_puyo_Manager : MonoBehaviour
 
     void stage_mass_Init()
     {
+        width_collect_val = gameObject.transform.position.x - 2.5f;
         //ステージマス上のデータの初期化
         for (int i = 0; i < STAGE_MASS.y; i++)
         {
@@ -313,7 +322,7 @@ public class CPU_puyo_Manager : MonoBehaviour
     private bool Is_Puyo_Landing(GameObject puyo)
     {
         //posから配列の場所を特定
-        Vector2Int pos = new Vector2Int((int)puyo.transform.position.x, (int)puyo.transform.position.y);
+        Vector2Int pos = new Vector2Int((int)(puyo.transform.position.x - width_collect_val), (int)puyo.transform.position.y);
 
         //一番下のマスに来た場合
         if (puyo.transform.position.y == 0.0f)
@@ -338,7 +347,7 @@ public class CPU_puyo_Manager : MonoBehaviour
         //最初のぷよが落ちた時
         if (Is_con())
         {
-            Vector2Int pos = new Vector2Int((int)active_puyo[puyo_num].transform.position.x, (int)active_puyo[puyo_num].transform.position.y);
+            Vector2Int pos = new Vector2Int((int)(active_puyo[puyo_num].transform.position.x - width_collect_val), (int)active_puyo[puyo_num].transform.position.y);
 
             Stage_puyo[pos.x, pos.y] = active_puyo[puyo_num].GetComponent<Puyo_Color>().Get_Color();
             last_puyos_pos[0] = new Vector2Int(pos.x, pos.y);
@@ -375,7 +384,7 @@ public class CPU_puyo_Manager : MonoBehaviour
 
     void Second_Puyo_Landing(int num)
     {
-        Vector2Int pos = new Vector2Int((int)active_puyo[num].transform.position.x, (int)active_puyo[num].transform.position.y);
+        Vector2Int pos = new Vector2Int((int)(active_puyo[num].transform.position.x - width_collect_val), (int)active_puyo[num].transform.position.y);
 
         Stage_puyo[pos.x, pos.y] = active_puyo[num].GetComponent<Puyo_Color>().Get_Color();
         last_puyos_pos[1] = new Vector2Int(pos.x, pos.y);
@@ -565,7 +574,7 @@ public class CPU_puyo_Manager : MonoBehaviour
             {
                 foreach (Vector2Int del_pos in col)
                 {
-                    if (del_pos.x == (int)puyo.transform.position.x
+                    if (del_pos.x == (int)(puyo.transform.position.x - width_collect_val)
                     && del_pos.y == (int)puyo.transform.position.y)
                     {
                         StartCoroutine(puyo.GetComponent<puyo_anim>().destroy_anim());
@@ -648,7 +657,7 @@ public class CPU_puyo_Manager : MonoBehaviour
         GameObject[] Puyos = GameObject.FindGameObjectsWithTag("Puyo");
         foreach (GameObject puyo in Puyos)
         {
-            if ((int)puyo.transform.position.x == col && !puyo.GetComponent<puyo_anim>().Is_destroy)
+            if ((int)(puyo.transform.position.x - width_collect_val) == col && !puyo.GetComponent<puyo_anim>().Is_destroy)
             {
                 col_puyos.Add(puyo);
             }
@@ -757,8 +766,11 @@ public class CPU_puyo_Manager : MonoBehaviour
         bool Is_puyo_cam = false;
         foreach (GameObject puyo in Puyos)
         {
-            puyo.transform.position -= new Vector3(0.0f, 0.5f, 0.0f);
-            if (puyo.transform.position.y >= -3.0f) Is_puyo_cam = true;
+            if (puyo.transform.position.x > width_collect_val && puyo.transform.position.x < STAGE_MASS.x + width_collect_val)
+            {
+                puyo.transform.position -= new Vector3(0.0f, 0.5f, 0.0f);
+                if (puyo.transform.position.y >= -3.0f) Is_puyo_cam = true;
+            }
         }
 
         if (Is_puyo_cam) StartCoroutine(puyo_over_anim());
@@ -779,5 +791,25 @@ public class CPU_puyo_Manager : MonoBehaviour
     public int[,] get_Stage_info()
     {
         return Stage_puyo;
+    }
+
+
+    void Deb_View(int num)
+    {
+        switch (num) {
+            case 0:
+                Debug.Log("CPU");
+                break;
+            case 1:
+                //Debug.Log("CPU");
+                break;
+            case 2:
+                //Debug.Log("CPU");
+                break;
+            case 3:
+                //Debug.Log("CPU");
+                break;
+        }
+
     }
 }

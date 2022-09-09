@@ -1,4 +1,4 @@
-﻿using System.Collections;
+﻿using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
@@ -10,14 +10,13 @@ public class UI_Manager : MonoBehaviour
     [SerializeField]Text chain_text;
     [SerializeField] Text score_text;
     [SerializeField] Text timer_text;
-    PuyoManager PM;
+    [SerializeField]PuyoManager PM;
     ScoreManager SM;
     timer _timer;
     [SerializeField] GameObject[] timer_ui;
     // Start is called before the first frame update
     void Start()
     {
-        PM = GameObject.Find("PuyoManager").GetComponent<PuyoManager>();
         SM = this.gameObject.GetComponent<ScoreManager>();
         _timer = this.gameObject.GetComponent<timer>();
     }
@@ -28,21 +27,20 @@ public class UI_Manager : MonoBehaviour
         stage_view();
 
         UI_view();
+
     }
 
     void stage_view()
     {
-        int[,] st_info = PM.get_Stage_info();
-
         string hoge = "";
 
         for (int i = 13; i >= 0; i--)
         {
             for (int j = 0; j < 6; j++)
             {
-                if(st_info[j, i] > 0)
+                if(PM.get_Stage_info()[j, i] > 0)
                 {
-                    hoge += st_info[j, i] + " ";
+                    hoge += PM.get_Stage_info()[j, i] + " ";
                 }
                 else
                 {
@@ -51,7 +49,7 @@ public class UI_Manager : MonoBehaviour
             }
             hoge += "\n";
         }
-
+        Debug.Log("STAGEUI : " + PM.gameObject.name);
         stage_info.text = hoge;
     }
 

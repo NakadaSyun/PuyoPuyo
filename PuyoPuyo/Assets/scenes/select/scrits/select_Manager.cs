@@ -27,6 +27,10 @@ public class select_Manager : MonoBehaviour
     //CPUを選んでいる間,色を変える
     [SerializeField] GameObject[] modes;
 
+    [SerializeField] GameObject[] sounds;
+
+    [SerializeField]private GameObject _feed;
+
     void Start()
     {
         Select_Col = 0;
@@ -60,18 +64,22 @@ public class select_Manager : MonoBehaviour
         else if (Input.GetKeyDown(KeyCode.UpArrow))
         {
             col_Up();
+            sounds[1].GetComponent<SE_Manager>().SE_Play(1);
         }
 
         //下矢印キーを押したとき
         if (Input.GetKeyDown(KeyCode.DownArrow))
         {
             col_down();
+            sounds[1].GetComponent<SE_Manager>().SE_Play(1);
         }
 
         //Spaceキーを押したとき
-        if (Input.GetKeyDown(KeyCode.Space))
+        if (Input.GetKeyDown(KeyCode.Space) || Input.GetKeyDown(KeyCode.Return))
         {
-            GotoMain();
+            sounds[1].GetComponent<SE_Manager>().SE_Play(0);
+            _feed.GetComponent<feed_Con>().Is_feedout();
+            Invoke("GotoMain",1.2f);
         }
     }
 
@@ -140,6 +148,11 @@ public class select_Manager : MonoBehaviour
         if(++Max_Color > 6)
         {
             Max_Color = 6;
+            sounds[1].GetComponent<SE_Manager>().SE_Play(2);
+        }
+        else
+        {
+            sounds[1].GetComponent<SE_Manager>().SE_Play(1);
         }
     }
     void Color_down()
@@ -147,6 +160,11 @@ public class select_Manager : MonoBehaviour
         if (--Max_Color < 2)
         {
             Max_Color = 2;
+            sounds[1].GetComponent<SE_Manager>().SE_Play(2);
+        }
+        else
+        {
+            sounds[1].GetComponent<SE_Manager>().SE_Play(1);
         }
     }
 
@@ -164,6 +182,7 @@ public class select_Manager : MonoBehaviour
         if(Select_Col <= 1)
         {
             change_flg(Select_Col);
+            sounds[1].GetComponent<SE_Manager>().SE_Play(1);
         }
         else if(Select_Col == 2)
         {
@@ -176,6 +195,7 @@ public class select_Manager : MonoBehaviour
         if (Select_Col <= 1)
         {
             change_flg(Select_Col);
+            sounds[1].GetComponent<SE_Manager>().SE_Play(1);
         }
         else if (Select_Col == 2)
         {

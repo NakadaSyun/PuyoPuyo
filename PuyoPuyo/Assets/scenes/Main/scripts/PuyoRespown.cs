@@ -22,20 +22,11 @@ public class PuyoRespown : MonoBehaviour
     //色取得用
     [SerializeField] Color_Order CO;
 
-    // Start is called before the first frame update
-    void Start()
+    void Awake()
     {
         puyo_count = 0;
         Init_reserve();
-        //this.GetComponent<PuyoManager>().create_new_puyo();
     }
-
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
-
     
     void puyo_next()
     {
@@ -61,7 +52,7 @@ public class PuyoRespown : MonoBehaviour
         {
             Vector3 pos = stanby_pos[i].transform.position;
 
-            stanby_puyo[(i*2)].transform.position =pos;
+            stanby_puyo[(i*2)].transform.position = pos;
 
             stanby_puyo[(i*2) + 1].transform.position =pos + new Vector3(0.0f,1.0f,0.0f);
         }
